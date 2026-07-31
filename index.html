@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>SubSync — subtitle companion</title>
+  <meta name="theme-color" content="#0d0f14" />
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="./icons/icon-192.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="SubSync" />
+  <link rel="stylesheet" href="./css/styles.css" />
+</head>
+<body>
+
+  <!-- ============ SETUP ============ -->
+  <main id="setup">
+    <header class="brand">
+      <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+      <h1>SubSync</h1>
+      <p class="tagline">Your subtitles, in step with the film.</p>
+    </header>
+
+    <section class="panel">
+      <h2 class="eyebrow">1 · How are you watching?</h2>
+      <div class="mode-grid">
+        <button class="mode-card" data-mode="A">
+          <span class="mode-title">Play a video file</span>
+          <span class="mode-desc">Open a movie file here. Subtitles lock to it exactly — no tapping, no guesswork.</span>
+        </button>
+        <button class="mode-card" data-mode="B">
+          <span class="mode-title">Companion</span>
+          <span class="mode-desc">Movie's on the TV or a streaming app. This iPad becomes a caption screen you align by tapping.</span>
+        </button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2 class="eyebrow">2 · Load subtitles (.srt)</h2>
+      <div class="load-grid">
+        <label class="file-btn">
+          <input type="file" id="srtFile" accept=".srt,text/plain" hidden />
+          Choose file
+        </label>
+        <div class="or">or</div>
+        <div class="paste-col">
+          <textarea id="srtPaste" rows="3" placeholder="…or paste .srt text here"></textarea>
+          <button id="loadPasteBtn" class="ghost">Load pasted text</button>
+        </div>
+        <div class="url-col">
+          <input id="srtUrl" type="url" inputmode="url" placeholder="…or paste a link to a .srt" />
+          <button id="loadUrlBtn" class="ghost">Fetch link</button>
+        </div>
+      </div>
+
+      <div id="srtListRow" class="srt-list-row" hidden>
+        <label for="srtList">Active subtitles</label>
+        <select id="srtList"></select>
+      </div>
+
+      <p id="warnings" class="warnings" role="status"></p>
+    </section>
+
+    <button id="startBtn" class="start" disabled>Start</button>
+    <p class="fineprint">Free · works offline · nothing leaves your device except optional translation.</p>
+  </main>
+
+  <!-- ============ STAGE ============ -->
+  <div id="stage" hidden>
+    <video id="video" playsinline controls></video>
+
+    <div class="topbar">
+      <button id="backBtn" class="icon-btn" aria-label="Back">‹</button>
+      <span id="modeLabel" class="mode-pill"></span>
+      <button id="gearBtn" class="icon-btn" aria-label="Controls">⚙</button>
+    </div>
+
+    <div id="captionWrap" class="caption-wrap">
+      <div id="captionTranslated" class="caption caption-translated"></div>
+      <div id="captionOriginal" class="caption caption-original"></div>
+    </div>
+
+    <!-- Controls drawer -->
+    <aside id="controls">
+      <h2 class="drawer-title">Controls</h2>
+
+      <div id="transportRow" class="row transport">
+        <button id="clockToggle" class="primary">Play</button>
+        <span id="clockTime" class="clock">00:00:00.000</span>
+        <span class="hint">Start this when the movie starts, then tap-sync.</span>
+      </div>
+
+      <section class="group">
+        <h3>Tap to sync</h3>
+        <p class="hint">When you hear this line, tap the button.</p>
+        <div class="tap-target">“<span id="tapTarget">—</span>”</div>
+        <button id="tapSyncBtn" class="primary big">Tap — this line is now</button>
+      </section>
+
+      <section class="group">
+        <h3>Fine adjust</h3>
+        <div class="nudge-row">
+          <button id="nudgeMinus1">−1s</button>
+          <button id="nudgeMinusS">−0.1</button>
+          <button id="nudgePlusS">+0.1</button>
+          <button id="nudgePlus1">+1s</button>
+        </div>
+        <div class="readout" id="offsetReadout">offset 00:00:00.000 · scale 1.0000</div>
+        <button id="resetSyncBtn" class="ghost small">Reset sync</button>
+      </section>
+
+      <section class="group">
+        <h3>Fix drift (two-point)</h3>
+        <p class="hint">Tap A on an early line, B on a late line, then apply — fixes gradual desync.</p>
+        <div class="nudge-row">
+          <button id="ptABtn">Set A</button>
+          <button id="ptBBtn">Set B</button>
+          <button id="applyTwoPt" class="primary">Apply</button>
+        </div>
+        <div class="readout" id="twoPtInfo"></div>
+      </section>
+
+      <section class="group">
+        <h3>Language</h3>
+        <div class="field">
+          <label for="targetLang">Show</label>
+          <select id="targetLang">
+            <option value="off">Original only</option>
+            <option value="en">English</option>
+            <option value="si">Sinhala</option>
+          </select>
+        </div>
+        <label class="check"><input type="checkbox" id="showBoth" /> Show original + translation</label>
+        <div class="field">
+          <label for="sourceLang">Subtitle language</label>
+          <select id="sourceLang">
+            <option value="en">English</option>
+            <option value="hi">Hindi</option>
+            <option value="ta">Tamil</option>
+            <option value="te">Telugu</option>
+            <option value="zh">Chinese</option>
+          </select>
+        </div>
+        <button id="translateBtn" class="primary">Translate subtitles</button>
+        <div id="translateProgress" class="progress" hidden>
+          <div class="bar"><div id="translateBar"></div></div>
+          <span id="translateCount"></span>
+        </div>
+        <p class="hint">Free translation (via <span id="endpointLabel"></span>) is approximate, Sinhala especially. Done once, then cached offline.</p>
+      </section>
+
+      <section class="group">
+        <h3>Display</h3>
+        <div class="field"><label for="fontScale">Caption size</label>
+          <input type="range" id="fontScale" min="0.7" max="2.2" step="0.05" /></div>
+        <div class="field"><label for="bgOpacity">Backing</label>
+          <input type="range" id="bgOpacity" min="0" max="0.9" step="0.05" /></div>
+      </section>
+
+      <section class="group">
+        <h3>Auto-sync</h3>
+        <button id="autoSyncBtn" class="ghost" hidden>Auto-sync (experimental)</button>
+        <p class="hint">Listens to the movie through the mic and guesses the offset. Often fails on iPad — Tap to sync is the reliable one.</p>
+      </section>
+    </aside>
+
+    <!-- Language pop-up on start -->
+    <div id="langPrompt" class="overlay" hidden>
+      <div class="overlay-card">
+        <h2>Subtitles in…</h2>
+        <div class="lang-btns">
+          <button data-lang="off">Original</button>
+          <button data-lang="en">English</button>
+          <button data-lang="si">Sinhala</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>
