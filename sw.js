@@ -1,7 +1,7 @@
 // sw.js — caches the app shell for offline use.
 // Bump CACHE when you change any cached file.
 
-const CACHE = 'subsync-v4';
+const CACHE = 'subsync-v5';
 
 const ASSETS = [
   './',
@@ -12,7 +12,6 @@ const ASSETS = [
   './js/syncEngine.js',
   './js/translator.js',
   './js/store.js',
-  './js/player.js',
   './js/clock.js',
   './js/speechAutoSync.js',
   './manifest.webmanifest',

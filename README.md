@@ -1,17 +1,15 @@
 # SubSync
 
-A free, offline-friendly **subtitle companion** for movies. It plays a `.srt` file in
-sync with a film — either a video you open in the app, or one playing on a TV / streaming
-app while your iPad shows the captions. Optional free translation to **English or Sinhala**.
+A free, offline-friendly **subtitle companion** for movies. The film plays wherever you
+already watch it — TV, Netflix, a projector — and your iPad shows the captions in sync
+beside it. Optional free translation to **English or Sinhala**.
 
 No backend. No API keys. No login. Pure static files that run on GitHub Pages.
 
-## Two ways to watch
+## How it works
 
-- **Play a video file** — open a movie file in the app. Subtitles lock to the video's own
-  clock exactly. No tapping needed. This is the most reliable mode.
-- **Companion** — the movie plays elsewhere (TV, Netflix, etc.). The iPad runs a local
-  clock you align with **Tap to Sync**, and shows big captions like a second screen.
+The movie plays elsewhere (TV, Netflix, etc.). The iPad runs a local clock you align with
+**Tap to Sync**, and shows big captions like a second screen.
 
 ## Syncing
 
@@ -66,8 +64,7 @@ index.html            app shell + UI
 css/styles.css        theme
 js/srtParser.js       .srt → cues
 js/syncEngine.js      offset + scale math, active-cue lookup
-js/player.js          Mode A time source (in-app <video>)
-js/clock.js           Mode B time source (local clock)
+js/clock.js           local clock driving the captions
 js/translator.js      free translation + cache
 js/store.js           settings, per-file sync, IndexedDB cache
 js/speechAutoSync.js  experimental mic auto-sync

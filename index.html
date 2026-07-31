@@ -23,21 +23,7 @@
     </header>
 
     <section class="panel">
-      <h2 class="eyebrow">1 · How are you watching?</h2>
-      <div class="mode-grid">
-        <button class="mode-card" data-mode="A">
-          <span class="mode-title">Play a video file</span>
-          <span class="mode-desc">Open a movie file here. Subtitles lock to it exactly — no tapping, no guesswork.</span>
-        </button>
-        <button class="mode-card" data-mode="B">
-          <span class="mode-title">Companion</span>
-          <span class="mode-desc">Movie's on the TV or a streaming app. This iPad becomes a caption screen you align by tapping.</span>
-        </button>
-      </div>
-    </section>
-
-    <section class="panel">
-      <h2 class="eyebrow">2 · Load subtitles (.srt)</h2>
+      <h2 class="eyebrow">Load subtitles (.srt)</h2>
       <div class="load-grid">
         <label class="file-btn">
           <!-- No accept filter: iOS maps accept to UTIs, and .srt has none,
@@ -71,11 +57,9 @@
 
   <!-- ============ STAGE ============ -->
   <div id="stage" hidden>
-    <video id="video" playsinline controls></video>
-
     <div class="topbar">
       <button id="backBtn" class="icon-btn" aria-label="Back">‹</button>
-      <span id="modeLabel" class="mode-pill"></span>
+      <span class="mode-pill">Companion</span>
       <button id="gearBtn" class="icon-btn" aria-label="Controls">⚙</button>
     </div>
 

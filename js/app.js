@@ -2,7 +2,6 @@
 
 import { parseSrt, formatMs } from './srtParser.js';
 import { SyncEngine } from './syncEngine.js';
-import { VideoSource } from './player.js';
 import { LocalClock } from './clock.js';
 import { translateCues, providerLabel } from './translator.js';
 import { speechSupported, attemptAutoSync } from './speechAutoSync.js';
@@ -16,26 +15,14 @@ const $ = (sel) => document.querySelector(sel);
 // ---- state ----
 const settings = loadSettings();
 const engine = new SyncEngine();
-const videoSource = new VideoSource($('#video'));
 const clock = new LocalClock();
 
-let mode = null;            // 'A' (in-app video) | 'B' (companion)
-let timeSource = null;      // videoSource | clock
+const timeSource = clock;   // companion mode: subtitles run off a local clock
 let srtFiles = [];          // [{ name, size, cues, warnings }]
 let activeSrt = -1;
 let translateAbort = null;
 let wakeLock = null;
 let twoPt = { a: null, b: null };
-
-// ---- setup: mode selection ----
-document.querySelectorAll('.mode-card').forEach((card) => {
-  card.addEventListener('click', () => {
-    document.querySelectorAll('.mode-card').forEach((c) => c.classList.remove('selected'));
-    card.classList.add('selected');
-    mode = card.dataset.mode;
-    refreshStartState();
-  });
-});
 
 // ---- setup: load SRT (file / paste / url) ----
 $('#srtFile').addEventListener('change', (e) => {
@@ -124,16 +111,10 @@ function applyActiveSrt() {
 }
 
 function refreshStartState() {
-  const needsMode = !mode;
   const needsSrt = srtFiles.length === 0;
-  $('#startBtn').disabled = needsMode || needsSrt;
-  // Say which step is still outstanding — a dead Start button with no
-  // explanation reads as broken.
-  $('#startHint').textContent =
-    needsMode && needsSrt ? 'Choose how you’re watching in step 1, then load a .srt in step 2.'
-    : needsMode ? 'Choose how you’re watching in step 1.'
-    : needsSrt ? 'Load a .srt file in step 2.'
-    : '';
+  $('#startBtn').disabled = needsSrt;
+  // A dead Start button with no explanation reads as broken.
+  $('#startHint').textContent = needsSrt ? 'Load a .srt file to continue.' : '';
 }
 
 function setWarning(msg) {
@@ -143,17 +124,12 @@ function setWarning(msg) {
 // ---- start ----
 $('#startBtn').addEventListener('click', () => {
   applyActiveSrt();
-  timeSource = mode === 'A' ? videoSource : clock;
 
   $('#setup').hidden = true;
   $('#stage').hidden = false;
-  document.body.classList.toggle('mode-companion', mode === 'B');
-
-  $('#video').hidden = mode !== 'A';
-  $('#transportRow').hidden = mode === 'A';   // Mode A uses the video's own controls
+  document.body.classList.add('mode-companion');
 
   $('#autoSyncBtn').hidden = !speechSupported();
-  $('#modeLabel').textContent = mode === 'A' ? 'In-app player' : 'Companion';
 
   showLangPrompt();
   requestWakeLock();
@@ -163,7 +139,7 @@ $('#startBtn').addEventListener('click', () => {
 $('#backBtn').addEventListener('click', () => {
   $('#stage').hidden = true;
   $('#setup').hidden = false;
-  if (mode === 'B') clock.pause();
+  clock.pause();
   releaseWakeLock();
 });
 
@@ -247,7 +223,7 @@ document.addEventListener('keydown', (e) => {
   if ($('#stage').hidden) return;
   if (e.key === 'ArrowLeft') nudge(-100);
   else if (e.key === 'ArrowRight') nudge(100);
-  else if (e.key === ' ' && mode === 'B') { e.preventDefault(); $('#clockToggle').click(); }
+  else if (e.key === ' ') { e.preventDefault(); $('#clockToggle').click(); }
 });
 
 function persistSync() {
@@ -374,8 +350,7 @@ function renderLoop() {
   const upcoming = engine.upcomingCue(t);
   $('#tapTarget').textContent = upcoming ? clip(upcoming.text, 60) : '—';
 
-  // Mode B clock readout.
-  if (mode === 'B') $('#clockTime').textContent = formatMs(t);
+  $('#clockTime').textContent = formatMs(t);
 
   requestAnimationFrame(renderLoop);
 }
