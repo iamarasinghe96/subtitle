@@ -17,7 +17,8 @@
   --danger:   #e0674f;
 
   --cap-scale: 1;        /* set from settings */
-  --cap-bg: 0.55;
+  --cap-bg: 0;           /* backing box — 0 keeps the stage pure black */
+  --cap-bright: 1;       /* caption opacity, for dark rooms */
 
   --r: 14px;
   font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -99,21 +100,24 @@ select {
 .fineprint { text-align: center; color: var(--muted); font-size: .78rem; margin-top: 14px; }
 
 /* ---------- STAGE ---------- */
+/* Pitch black: on an OLED panel a #000 pixel is switched off, so the stage
+   draws almost no power. Nothing here paints a non-black pixel except the
+   captions and the two topbar buttons. */
 #stage { position: fixed; inset: 0; background: #000; }
-body.mode-companion #stage { background:
-  radial-gradient(120% 90% at 50% 0%, #12151f 0%, #05060a 70%); }
 
 .topbar {
   position: absolute; top: 0; left: 0; right: 0; z-index: 5;
   display: flex; align-items: center; justify-content: space-between;
   padding: max(10px, env(safe-area-inset-top)) 14px 10px;
-  background: linear-gradient(#000a, #0000);
 }
 .icon-btn {
-  width: 44px; height: 44px; border-radius: 50%; background: #ffffff14; color: var(--text);
-  font-size: 1.4rem; line-height: 1; display: grid; place-items: center; backdrop-filter: blur(6px);
+  width: 44px; height: 44px; border-radius: 50%; background: #ffffff0f; color: #7d8496;
+  font-size: 1.4rem; line-height: 1; display: grid; place-items: center;
 }
-.mode-pill { color: var(--muted); font-size: .8rem; letter-spacing: .04em; text-transform: uppercase; }
+/* Back is a rare action — keep it findable but barely lit. The gear stays
+   brighter because it is the one control needed mid-film. */
+#backBtn { background: none; color: #4a5061; }
+#gearBtn { color: #aab2c4; }
 
 .caption-wrap {
   position: absolute; left: 0; right: 0; bottom: 8%; z-index: 4;
@@ -125,8 +129,8 @@ body.mode-companion .caption-wrap { top: 0; bottom: 0; justify-content: center; 
   max-width: 24ch; line-height: 1.25; text-wrap: balance;
   padding: .18em .5em; border-radius: 8px;
   background: rgba(0,0,0,var(--cap-bg));
-  text-shadow: 0 2px 10px #000c;
   white-space: pre-line;
+  opacity: var(--cap-bright);
 }
 .caption-translated { font-size: calc(2.1rem * var(--cap-scale)); font-weight: 640; }
 .caption-original {

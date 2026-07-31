@@ -59,7 +59,6 @@
   <div id="stage" hidden>
     <div class="topbar">
       <button id="backBtn" class="icon-btn" aria-label="Back">‹</button>
-      <span class="mode-pill">Companion</span>
       <button id="gearBtn" class="icon-btn" aria-label="Controls">⚙</button>
     </div>
 
@@ -150,6 +149,11 @@
           <input type="range" id="fontScale" min="0.7" max="2.2" step="0.05" /></div>
         <div class="field"><label for="bgOpacity">Backing</label>
           <input type="range" id="bgOpacity" min="0" max="0.9" step="0.05" /></div>
+        <div class="field"><label for="capBright">Brightness</label>
+          <input type="range" id="capBright" min="0.15" max="1" step="0.05" /></div>
+        <p class="hint">The stage is pure black so an OLED screen barely draws
+          power. Turn brightness down in a dark room — it dims the captions
+          without touching the system slider.</p>
       </section>
 
       <section class="group">

@@ -10,7 +10,8 @@ const DEFAULT_SETTINGS = {
   sourceLang: 'en',         // source language of the SRT for translation
   showBoth: false,          // show original + translation stacked
   fontScale: 1.0,           // caption size multiplier
-  bgOpacity: 0.55,          // caption background opacity
+  bgOpacity: 0,             // caption backing — 0 keeps the stage pure black
+  capBright: 1.0,           // caption opacity, for dark rooms
   endpoint: 'mymemory',     // translation provider id
 };
 

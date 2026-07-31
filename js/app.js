@@ -249,6 +249,7 @@ function syncSettingsToControls() {
   $('#showBoth').checked = settings.showBoth;
   $('#fontScale').value = settings.fontScale;
   $('#bgOpacity').value = settings.bgOpacity;
+  $('#capBright').value = settings.capBright;
   applyDisplayVars();
 }
 $('#targetLang').addEventListener('change', (e) => { settings.targetLang = e.target.value; saveSettings(settings); });
@@ -256,10 +257,12 @@ $('#sourceLang').addEventListener('change', (e) => { settings.sourceLang = e.tar
 $('#showBoth').addEventListener('change', (e) => { settings.showBoth = e.target.checked; saveSettings(settings); });
 $('#fontScale').addEventListener('input', (e) => { settings.fontScale = Number(e.target.value); applyDisplayVars(); saveSettings(settings); });
 $('#bgOpacity').addEventListener('input', (e) => { settings.bgOpacity = Number(e.target.value); applyDisplayVars(); saveSettings(settings); });
+$('#capBright').addEventListener('input', (e) => { settings.capBright = Number(e.target.value); applyDisplayVars(); saveSettings(settings); });
 
 function applyDisplayVars() {
   document.documentElement.style.setProperty('--cap-scale', settings.fontScale);
   document.documentElement.style.setProperty('--cap-bg', settings.bgOpacity);
+  document.documentElement.style.setProperty('--cap-bright', settings.capBright);
 }
 
 // ---- Translation ----
