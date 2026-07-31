@@ -1,5 +1,10 @@
 /* SubSync — projection-booth dark theme, single warm amber accent. */
 
+/* The [hidden] attribute hides via the UA stylesheet, which any author
+   `display` rule outranks. Several components below set display (.overlay,
+   .progress, .srt-list-row), so without this they never hide. */
+[hidden] { display: none !important; }
+
 :root {
   --ink:      #0d0f14;   /* deep charcoal-ink background */
   --ink-2:    #141824;   /* raised surface */

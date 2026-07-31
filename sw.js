@@ -1,7 +1,7 @@
 // sw.js — caches the app shell for offline use.
 // Bump CACHE when you change any cached file.
 
-const CACHE = 'subsync-v2';
+const CACHE = 'subsync-v3';
 
 const ASSETS = [
   './',
