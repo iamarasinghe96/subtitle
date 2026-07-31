@@ -93,8 +93,14 @@ textarea:focus, input:focus, select:focus, .mode-card:focus-visible, button:focu
 .srt-list-row label { color: var(--muted); font-size: .82rem; }
 select {
   background: var(--ink-3); border: 1.5px solid var(--line); border-radius: 10px; padding: 11px;
+  /* Without these a long subtitle filename sizes the select to its widest
+     option and stretches the whole page sideways. min-width: 0 is what stops
+     the grid/flex item from blowing out its track. */
+  width: 100%; min-width: 0; max-width: 100%;
+  text-overflow: ellipsis;
 }
 .warnings { color: var(--muted); font-size: .85rem; min-height: 1.2em; margin: 14px 0 0; line-height: 1.4; }
+.start-hint { color: var(--amber); font-size: .85rem; text-align: center; margin-top: 8px; line-height: 1.4; }
 
 .start {
   width: 100%; background: var(--amber); color: #241a05; font-weight: 750; font-size: 1.1rem;

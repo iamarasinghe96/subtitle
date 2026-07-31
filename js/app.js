@@ -84,13 +84,23 @@ function addSrt(name, size, text) {
   refreshStartState();
 }
 
+// Release names run long ("Movie.2026.1080p.WEBRip.x265.10bit.AAC5.1-GROUP.srt").
+// Keep the head and tail so releases stay tellable apart, drop the middle.
+function shortName(name, max = 40) {
+  const base = name.replace(/\.srt$/i, '');
+  if (base.length <= max) return base;
+  const head = Math.ceil((max - 1) / 2);
+  return `${base.slice(0, head)}…${base.slice(base.length - (max - 1 - head))}`;
+}
+
 function rebuildSrtList() {
   const sel = $('#srtList');
   sel.innerHTML = '';
   srtFiles.forEach((f, i) => {
     const opt = document.createElement('option');
     opt.value = String(i);
-    opt.textContent = `${f.name} · ${f.cues.length} lines`;
+    opt.textContent = `${shortName(f.name)} · ${f.cues.length} lines`;
+    opt.title = f.name;
     sel.appendChild(opt);
   });
   sel.value = String(activeSrt);
@@ -114,7 +124,16 @@ function applyActiveSrt() {
 }
 
 function refreshStartState() {
-  $('#startBtn').disabled = !(mode && srtFiles.length > 0);
+  const needsMode = !mode;
+  const needsSrt = srtFiles.length === 0;
+  $('#startBtn').disabled = needsMode || needsSrt;
+  // Say which step is still outstanding — a dead Start button with no
+  // explanation reads as broken.
+  $('#startHint').textContent =
+    needsMode && needsSrt ? 'Choose how you’re watching in step 1, then load a .srt in step 2.'
+    : needsMode ? 'Choose how you’re watching in step 1.'
+    : needsSrt ? 'Load a .srt file in step 2.'
+    : '';
 }
 
 function setWarning(msg) {
@@ -388,6 +407,7 @@ document.addEventListener('visibilitychange', () => {
 $('#endpointLabel').textContent = providerLabel(settings.endpoint);
 syncSettingsToControls();
 applyDisplayVars();
+refreshStartState();
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
