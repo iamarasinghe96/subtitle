@@ -68,9 +68,16 @@
       <div id="captionOriginal" class="caption caption-original"></div>
     </div>
 
+    <!-- Tapping outside the drawer closes it; the gear that opened it is
+         underneath the drawer on a phone-width screen. -->
+    <div id="controlsScrim" class="controls-scrim" hidden></div>
+
     <!-- Controls drawer -->
     <aside id="controls">
-      <h2 class="drawer-title">Controls</h2>
+      <div class="drawer-head">
+        <h2 class="drawer-title">Controls</h2>
+        <button id="closeControlsBtn" class="icon-btn" aria-label="Close controls">×</button>
+      </div>
 
       <div id="transportRow" class="row transport">
         <button id="clockToggle" class="primary">Play</button>

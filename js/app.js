@@ -139,6 +139,7 @@ $('#startBtn').addEventListener('click', () => {
 $('#backBtn').addEventListener('click', () => {
   $('#stage').hidden = true;
   $('#setup').hidden = false;
+  setControlsOpen(false);
   clock.pause();
   releaseWakeLock();
 });
@@ -164,9 +165,15 @@ function maybeOfferTranslate() {
 }
 
 // ---- controls drawer ----
+function setControlsOpen(open) {
+  $('#controls').classList.toggle('open', open);
+  $('#controlsScrim').hidden = !open;
+}
 $('#gearBtn').addEventListener('click', () => {
-  $('#controls').classList.toggle('open');
+  setControlsOpen(!$('#controls').classList.contains('open'));
 });
+$('#closeControlsBtn').addEventListener('click', () => setControlsOpen(false));
+$('#controlsScrim').addEventListener('click', () => setControlsOpen(false));
 
 // Mode B transport
 $('#clockToggle').addEventListener('click', () => {
@@ -218,10 +225,11 @@ $('#nudgePlusS').addEventListener('click', () => nudge(100));
 $('#nudgePlus1').addEventListener('click', () => nudge(1000));
 $('#resetSyncBtn').addEventListener('click', () => { engine.reset(); persistSync(); updateOffsetReadout(); });
 
-// Keyboard: arrows nudge, space pauses (Mode B)
+// Keyboard: arrows nudge, space pauses the clock, Escape closes the drawer.
 document.addEventListener('keydown', (e) => {
   if ($('#stage').hidden) return;
-  if (e.key === 'ArrowLeft') nudge(-100);
+  if (e.key === 'Escape') setControlsOpen(false);
+  else if (e.key === 'ArrowLeft') nudge(-100);
   else if (e.key === 'ArrowRight') nudge(100);
   else if (e.key === ' ') { e.preventDefault(); $('#clockToggle').click(); }
 });

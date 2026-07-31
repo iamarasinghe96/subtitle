@@ -148,7 +148,12 @@ body.mode-companion .caption-original { font-size: calc(2rem * var(--cap-scale))
 }
 #controls.open { transform: translateX(0); box-shadow: -20px 0 60px #000a; }
 @media (prefers-reduced-motion: reduce) { #controls { transition: none; } }
-.drawer-title { font-size: 1.1rem; margin-bottom: 8px; }
+.controls-scrim { position: absolute; inset: 0; z-index: 7; background: #0007; }
+.drawer-head {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; margin-bottom: 8px;
+}
+.drawer-title { font-size: 1.1rem; }
 
 .group { border-top: 1px solid var(--line); padding: 16px 0 4px; }
 .group h3 { font-size: .95rem; margin-bottom: 8px; }
