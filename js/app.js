@@ -39,8 +39,14 @@ document.querySelectorAll('.mode-card').forEach((card) => {
 
 // ---- setup: load SRT (file / paste / url) ----
 $('#srtFile').addEventListener('change', (e) => {
-  const file = e.target.files[0];
-  if (file) file.text().then((txt) => addSrt(file.name, file.size, txt));
+  const input = e.target;
+  const file = input.files[0];
+  if (!file) return;
+  file.text()
+    .then((txt) => addSrt(file.name, file.size, txt))
+    .catch(() => setWarning(`Couldn't read "${file.name}". Try a different file.`))
+    // Reset so re-picking the same file fires change again after a failed load.
+    .finally(() => { input.value = ''; });
 });
 
 $('#loadPasteBtn').addEventListener('click', () => {

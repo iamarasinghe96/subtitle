@@ -40,7 +40,9 @@
       <h2 class="eyebrow">2 · Load subtitles (.srt)</h2>
       <div class="load-grid">
         <label class="file-btn">
-          <input type="file" id="srtFile" accept=".srt,text/plain" hidden />
+          <!-- No accept filter: iOS maps accept to UTIs, and .srt has none,
+               so any filter grays out every .srt file in the Files picker. -->
+          <input type="file" id="srtFile" hidden />
           Choose file
         </label>
         <div class="or">or</div>
