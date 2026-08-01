@@ -27,8 +27,24 @@
       <button id="autoFindBtn" class="primary big">Listen &amp; find subtitles</button>
       <p id="autoStatus" class="auto-status" role="status"></p>
       <p class="hint">Start the film, then tap. Listens for ~15 seconds, works out
-        which film it is, downloads the subtitles and lines them up.
-        Needs your API keys in Controls → Auto-find.</p>
+        which film it is, downloads the subtitles and lines them up.</p>
+
+      <!-- Setup-time config, so it lives here rather than in the mid-film
+           drawer — that drawer is only reachable after subtitles are loaded. -->
+      <details id="keysBox" class="keys">
+        <summary>Keys &amp; account</summary>
+        <p class="hint">Stored on this device only, never sent anywhere but the
+          two services below. The Groq key works out which film you're watching
+          from the dialogue; the OpenSubtitles account downloads the file.</p>
+        <div class="field"><label for="groqKey">Groq key</label>
+          <input type="password" id="groqKey" autocomplete="off" placeholder="gsk_…" /></div>
+        <div class="field"><label for="osApiKey">OpenSubtitles key</label>
+          <input type="password" id="osApiKey" autocomplete="off" /></div>
+        <div class="field"><label for="osUser">OpenSubtitles user</label>
+          <input type="text" id="osUser" autocomplete="off" inputmode="email" /></div>
+        <div class="field"><label for="osPass">OpenSubtitles password</label>
+          <input type="password" id="osPass" autocomplete="off" /></div>
+      </details>
     </section>
 
     <section class="panel">
@@ -163,21 +179,6 @@
         <p class="hint">The stage is pure black so an OLED screen barely draws
           power. Turn brightness down in a dark room — it dims the captions
           without touching the system slider.</p>
-      </section>
-
-      <section class="group">
-        <h3>Auto-find</h3>
-        <p class="hint">Stored on this device only, never sent anywhere but the
-          two services below. The Groq key works out which film you're watching
-          from the dialogue; the OpenSubtitles account downloads the file.</p>
-        <div class="field"><label for="groqKey">Groq key</label>
-          <input type="password" id="groqKey" autocomplete="off" placeholder="gsk_…" /></div>
-        <div class="field"><label for="osApiKey">OpenSubtitles key</label>
-          <input type="password" id="osApiKey" autocomplete="off" /></div>
-        <div class="field"><label for="osUser">OpenSubtitles user</label>
-          <input type="text" id="osUser" autocomplete="off" /></div>
-        <div class="field"><label for="osPass">OpenSubtitles password</label>
-          <input type="password" id="osPass" autocomplete="off" /></div>
       </section>
 
       <section class="group">

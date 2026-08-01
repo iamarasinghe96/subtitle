@@ -129,7 +129,7 @@ function setAutoStatus(msg) {
 }
 
 const AUTO_ERRORS = {
-  'no-api-key': 'Add your Groq key in Controls → Auto-find.',
+  'no-api-key': 'Open “Keys & account” above and add your Groq key.',
   'bad-api-key': 'That Groq key was rejected.',
   'rate-limited': 'Groq rate limit hit — wait a moment and try again.',
   'model-retired': 'Groq retired that model — update MODEL in js/movieId.js.',
@@ -137,7 +137,7 @@ const AUTO_ERRORS = {
   'transcript-too-short': "Didn't catch enough dialogue. Turn the volume up and try again.",
   'refused': "Couldn't identify that one. Load the .srt manually.",
   'truncated': 'Ran out of room mid-answer — try again.',
-  'os-no-api-key': 'Add your OpenSubtitles key in Controls → Auto-find.',
+  'os-no-api-key': 'Open “Keys & account” above and add your OpenSubtitles key.',
   'os-bad-api-key': 'That OpenSubtitles key was rejected.',
   'os-bad-login': 'OpenSubtitles username or password was rejected.',
   'os-quota-exhausted': "You've used today's OpenSubtitles downloads.",
@@ -206,6 +206,8 @@ $('#autoFindBtn').addEventListener('click', async () => {
   } catch (err) {
     clock.pause();
     setAutoStatus(autoErrorMessage(err));
+    // Pointing at a collapsed box is no help — open it.
+    if (/api-key|bad-login/.test(err.message)) $('#keysBox').open = true;
   } finally {
     autoBusy = false;
     $('#autoFindBtn').disabled = false;

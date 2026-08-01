@@ -191,6 +191,16 @@ body.mode-companion .caption-original { font-size: calc(2rem * var(--cap-scale))
   border-radius: 8px; padding: 8px 10px; font-size: .9rem;
 }
 
+.keys { margin-top: 16px; border-top: 1px solid var(--line); padding-top: 12px; }
+.keys > summary {
+  cursor: pointer; color: var(--muted); font-size: .85rem;
+  list-style: none; padding: 4px 0;
+}
+.keys > summary::-webkit-details-marker { display: none; }
+.keys > summary::before { content: '▸ '; }
+.keys[open] > summary::before { content: '▾ '; }
+.keys[open] > summary { color: var(--text); margin-bottom: 4px; }
+
 .auto-status { color: var(--amber); font-size: .88rem; min-height: 1.2em; margin: 10px 0 0; line-height: 1.4; }
 .film-heard {
   color: var(--muted); font-size: .82rem; font-style: italic;

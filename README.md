@@ -13,7 +13,8 @@ kept in your browser's local storage and never committed.
 One button: it listens to the film through the mic for ~15 seconds, works out
 which film it is, downloads the subtitles, and loads them roughly aligned.
 
-Two credentials are needed, both entered in **Controls → Auto-find**:
+Two credentials are needed, both entered under **Keys & account** on the
+setup screen:
 
 - **Groq API key** — identifies the film from the overheard dialogue. No public
   subtitle API searches by dialogue content (OpenSubtitles matches on title,
