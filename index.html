@@ -165,7 +165,17 @@
           <div class="bar"><div id="translateBar"></div></div>
           <span id="translateCount"></span>
         </div>
-        <p class="hint">Free translation (via <span id="endpointLabel"></span>) is approximate, Sinhala especially. Done once, then cached offline.</p>
+        <div class="field">
+          <label for="endpoint">Translated by</label>
+          <select id="endpoint">
+            <option value="groq">Groq (your key)</option>
+            <option value="mymemory">MyMemory (free)</option>
+          </select>
+        </div>
+        <p id="translateHint" class="hint"></p>
+        <p class="hint">Machine translation is approximate — Sinhala especially,
+          since it has far less training data than English. Expect to reread the
+          odd line.</p>
       </section>
 
       <section class="group">

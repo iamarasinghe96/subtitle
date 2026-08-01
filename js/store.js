@@ -12,7 +12,7 @@ const DEFAULT_SETTINGS = {
   fontScale: 1.0,           // caption size multiplier
   bgOpacity: 0,             // caption backing — 0 keeps the stage pure black
   capBright: 1.0,           // caption opacity, for dark rooms
-  endpoint: 'mymemory',     // translation provider id
+  endpoint: 'groq',         // translation provider id
 
   // Auto-find credentials. Kept on this device only — never in the repo.
   groqKey: '',              // identifies the film from overheard dialogue

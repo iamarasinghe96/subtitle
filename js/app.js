@@ -3,7 +3,7 @@
 import { parseSrt, formatMs } from './srtParser.js';
 import { SyncEngine } from './syncEngine.js';
 import { LocalClock } from './clock.js';
-import { translateCues, providerLabel } from './translator.js';
+import { translateCues, providerNeedsKey } from './translator.js';
 import { speechSupported, attemptAutoSync, listen, bestCueMatch } from './speechAutoSync.js';
 import { identifyFilm } from './movieId.js';
 import { searchSubtitles, downloadSubtitle } from './subtitleFinder.js';
@@ -407,6 +407,8 @@ function syncSettingsToControls() {
   $('#bgOpacity').value = settings.bgOpacity;
   $('#capBright').value = settings.capBright;
   CREDENTIAL_FIELDS.forEach((k) => { $(`#${k}`).value = settings[k] || ''; });
+  $('#endpoint').value = settings.endpoint;
+  updateTranslateHint();
   applyDisplayVars();
 }
 
@@ -443,23 +445,50 @@ $('#translateBtn').addEventListener('click', async () => {
   $('#translateBtn').disabled = true;
   $('#translateProgress').hidden = false;
 
-  const { failed } = await translateCues(f.cues, {
-    src, tgt,
-    endpoint: settings.endpoint,
-    signal: translateAbort.signal,
-    onProgress: (done, total, fail) => {
-      $('#translateBar').style.width = `${Math.round((done / total) * 100)}%`;
-      $('#translateCount').textContent = `${done}/${total}${fail ? ` · ${fail} failed` : ''}`;
-    },
-  });
-
-  $('#translateBtn').disabled = false;
-  setControlMsg(
-    failed
-      ? `Translated with ${failed} lines skipped (free-tier limit). Tap Translate again later to fill gaps — done lines are cached.`
-      : `Translated all lines to ${tgt === 'si' ? 'Sinhala' : 'English'}. Cached for offline use.`
-  );
+  const langLabel = tgt === 'si' ? 'Sinhala' : 'English';
+  try {
+    const { failed } = await translateCues(f.cues, {
+      src, tgt,
+      endpoint: settings.endpoint,
+      apiKey: settings.groqKey,
+      signal: translateAbort.signal,
+      onProgress: (done, total, fail) => {
+        $('#translateBar').style.width = `${Math.round((done / total) * 100)}%`;
+        $('#translateCount').textContent = `${done}/${total}${fail ? ` · ${fail} failed` : ''}`;
+      },
+    });
+    setControlMsg(
+      failed
+        ? `Translated to ${langLabel} with ${failed} lines skipped. Tap Translate again to fill the gaps — finished lines are cached.`
+        : `Translated every line to ${langLabel}. Cached for offline use.`
+    );
+  } catch (err) {
+    setControlMsg(
+      err.message === 'no-api-key'
+        ? 'Groq translation needs your key — add it under “Keys & account” on the setup screen, or switch the provider to MyMemory.'
+        : err.message === 'bad-api-key'
+          ? 'That Groq key was rejected.'
+          : `Translation failed: ${err.message}`
+    );
+  } finally {
+    $('#translateBtn').disabled = false;
+  }
 });
+
+$('#endpoint').addEventListener('change', (e) => {
+  settings.endpoint = e.target.value;
+  saveSettings(settings);
+  updateTranslateHint();
+});
+
+function updateTranslateHint() {
+  const needsKey = providerNeedsKey(settings.endpoint);
+  $('#translateHint').textContent = needsKey && !settings.groqKey
+    ? 'This provider needs your Groq key — add it under “Keys & account” on the setup screen.'
+    : needsKey
+      ? 'Translated in batches, so a full film takes a couple of minutes. Done once, then cached offline.'
+      : 'Free but rate-limited: a full film will exceed the daily quota. Fine for short files.';
+}
 
 function setControlMsg(msg) { $('#twoPtInfo').textContent = msg; }
 
@@ -555,7 +584,6 @@ document.addEventListener('visibilitychange', () => {
 });
 
 // ---- init ----
-$('#endpointLabel').textContent = providerLabel(settings.endpoint);
 syncSettingsToControls();
 applyDisplayVars();
 refreshStartState();

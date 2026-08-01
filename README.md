@@ -2,7 +2,7 @@
 
 A free, offline-friendly **subtitle companion** for movies. The film plays wherever you
 already watch it — TV, Netflix, a projector — and your iPad shows the captions in sync
-beside it. Optional free translation to **English or Sinhala**.
+beside it. Optional translation to **English or Sinhala**.
 
 No backend. Pure static files that run on GitHub Pages. Loading a `.srt` yourself
 needs no account at all; the optional auto-find feature uses your own API keys,
@@ -90,6 +90,14 @@ Open the Pages URL in **Safari** → Share → **Add to Home Screen**. It launch
   is hard to transcribe and iOS often disables speech recognition inside a home-screen PWA,
   so treat it as a bonus — Tap to Sync is the dependable path.
 - Live translation needs a connection; cached translations keep working offline.
+- Two providers, picked under Controls → Language:
+  - **Groq** (default) translates ~40 lines per request, so a feature film is a
+    few dozen calls and finishes in a couple of minutes. Uses the same key as
+    auto-find.
+  - **MyMemory** needs no key but sends one request per line against a small
+    daily character quota — fine for a short clip, it will not finish a film.
+- Sinhala output is noticeably rougher than English: it is a low-resource
+  language for every machine translator, so expect to reread the odd line.
 
 ## Project layout
 
