@@ -13,6 +13,12 @@ const DEFAULT_SETTINGS = {
   bgOpacity: 0,             // caption backing — 0 keeps the stage pure black
   capBright: 1.0,           // caption opacity, for dark rooms
   endpoint: 'mymemory',     // translation provider id
+
+  // Auto-find credentials. Kept on this device only — never in the repo.
+  anthropicKey: '',         // identifies the film from overheard dialogue
+  osApiKey: '',             // OpenSubtitles API key
+  osUser: '',
+  osPass: '',
 };
 
 export function loadSettings() {

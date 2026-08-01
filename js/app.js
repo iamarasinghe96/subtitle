@@ -4,7 +4,9 @@ import { parseSrt, formatMs } from './srtParser.js';
 import { SyncEngine } from './syncEngine.js';
 import { LocalClock } from './clock.js';
 import { translateCues, providerLabel } from './translator.js';
-import { speechSupported, attemptAutoSync } from './speechAutoSync.js';
+import { speechSupported, attemptAutoSync, listen, bestCueMatch } from './speechAutoSync.js';
+import { identifyFilm } from './movieId.js';
+import { searchSubtitles, downloadSubtitle } from './subtitleFinder.js';
 import {
   loadSettings, saveSettings,
   syncKeyFor, loadSync, saveSync,
@@ -110,6 +112,152 @@ function applyActiveSrt() {
   updateOffsetReadout();
 }
 
+// ---- auto-find: listen → identify → download → load → start ----
+const LISTEN_MS = 15000;
+
+// Speech recognition wants a BCP-47 tag, not the bare ISO code the subtitle
+// language picker uses — "hi-US" is not a locale.
+const SPEECH_LOCALES = {
+  en: 'en-US', hi: 'hi-IN', ta: 'ta-IN', te: 'te-IN', zh: 'zh-CN', si: 'si-LK',
+};
+const speechLocale = (lang) => SPEECH_LOCALES[lang] || 'en-US';
+
+let autoBusy = false;
+
+function setAutoStatus(msg) {
+  $('#autoStatus').textContent = msg || '';
+}
+
+const AUTO_ERRORS = {
+  'no-api-key': 'Add your Anthropic key in Controls → Auto-find.',
+  'bad-api-key': 'That Anthropic key was rejected.',
+  'rate-limited': 'Anthropic rate limit hit — wait a moment and try again.',
+  'transcript-too-short': "Didn't catch enough dialogue. Turn the volume up and try again.",
+  'refused': "Couldn't identify that one. Load the .srt manually.",
+  'truncated': 'Ran out of room mid-answer — try again.',
+  'os-no-api-key': 'Add your OpenSubtitles key in Controls → Auto-find.',
+  'os-bad-api-key': 'That OpenSubtitles key was rejected.',
+  'os-bad-login': 'OpenSubtitles username or password was rejected.',
+  'os-quota-exhausted': "You've used today's OpenSubtitles downloads.",
+  'os-token-expired': 'OpenSubtitles session expired — tap again.',
+  'no-results': 'No subtitles found for that film.',
+};
+
+function autoErrorMessage(err) {
+  if (AUTO_ERRORS[err.message]) return AUTO_ERRORS[err.message];
+  if (/^claude-http-/.test(err.message)) return `Identification failed (${err.message}).`;
+  if (/^os-/.test(err.message)) return `Subtitle download failed (${err.message}).`;
+  // A cross-origin block surfaces as a bare TypeError with no status.
+  if (err.name === 'TypeError') return 'Network blocked that request — see the README on CORS.';
+  return `Something went wrong: ${err.message}`;
+}
+
+$('#autoFindBtn').addEventListener('click', async () => {
+  if (autoBusy) return;
+  if (!speechSupported()) {
+    setAutoStatus("This browser can't listen through the mic. Load the .srt manually.");
+    return;
+  }
+
+  autoBusy = true;
+  $('#autoFindBtn').disabled = true;
+  try {
+    setAutoStatus('Listening… keep the film playing.');
+    const { transcript } = await listen(LISTEN_MS, speechLocale(settings.sourceLang));
+    // Start the clock the moment listening ends so it keeps pace with the film
+    // while the download runs.
+    clock.reset();
+    clock.start();
+
+    setAutoStatus('Working out which film this is…');
+    const guesses = await identifyFilm(transcript, { apiKey: settings.anthropicKey });
+    if (guesses.length === 0) throw new Error('refused');
+
+    const pick = await askWhichFilm(transcript, guesses);
+    if (!pick) { setAutoStatus('Cancelled.'); return; }
+
+    setAutoStatus(`Looking for “${pick.title}” subtitles…`);
+    const hits = await searchSubtitles({
+      title: pick.title,
+      year: pick.year,
+      language: settings.sourceLang,
+      apiKey: settings.osApiKey,
+    });
+    if (hits.length === 0) throw new Error('no-results');
+
+    setAutoStatus('Downloading…');
+    const { name, text, remaining } = await downloadSubtitle({
+      fileId: hits[0].fileId,
+      apiKey: settings.osApiKey,
+      username: settings.osUser,
+      password: settings.osPass,
+    });
+
+    const before = srtFiles.length;
+    addSrt(name, text.length, text);
+    if (srtFiles.length === before) return;  // addSrt already explained why
+
+    applyActiveSrt();
+    anchorFromTranscript(transcript);
+    enterStage();
+    setAutoStatus(remaining === null ? '' : `${remaining} downloads left today.`);
+  } catch (err) {
+    clock.pause();
+    setAutoStatus(autoErrorMessage(err));
+  } finally {
+    autoBusy = false;
+    $('#autoFindBtn').disabled = false;
+  }
+});
+
+// Rough first alignment. The matched line was heard somewhere inside the
+// listening window, so anchor it to the middle — good to a few seconds, which
+// Tap to sync then refines.
+function anchorFromTranscript(transcript) {
+  const f = srtFiles[activeSrt];
+  const match = bestCueMatch(transcript, f.cues);
+  if (!match) {
+    setWarning('Loaded. Use Tap to sync when you hear a line you can see.');
+    return;
+  }
+  engine.syncCueToNow(match.cue, -LISTEN_MS / 2);
+  persistSync();
+  updateOffsetReadout();
+  setWarning('Loaded and roughly aligned — Tap to sync to sharpen it.');
+}
+
+// Resolves to the chosen guess, or null if dismissed.
+function askWhichFilm(transcript, guesses) {
+  return new Promise((resolve) => {
+    const list = $('#filmChoices');
+    list.innerHTML = '';
+    $('#filmHeard').textContent = `Heard: “${clip(transcript, 140)}”`;
+
+    const close = (value) => {
+      $('#filmPrompt').hidden = true;
+      list.innerHTML = '';
+      resolve(value);
+    };
+
+    guesses.forEach((g) => {
+      const btn = document.createElement('button');
+      btn.className = 'film-choice';
+      btn.innerHTML = '';
+      const title = document.createElement('span');
+      title.textContent = `${g.title}${g.year ? ` (${g.year})` : ''}`;
+      const why = document.createElement('span');
+      why.className = 'film-why';
+      why.textContent = g.why;
+      btn.append(title, why);
+      btn.addEventListener('click', () => close(g), { once: true });
+      list.appendChild(btn);
+    });
+
+    $('#filmCancelBtn').addEventListener('click', () => close(null), { once: true });
+    $('#filmPrompt').hidden = false;
+  });
+}
+
 function refreshStartState() {
   const needsSrt = srtFiles.length === 0;
   $('#startBtn').disabled = needsSrt;
@@ -122,18 +270,22 @@ function setWarning(msg) {
 }
 
 // ---- start ----
-$('#startBtn').addEventListener('click', () => {
-  applyActiveSrt();
-
+function enterStage() {
   $('#setup').hidden = true;
   $('#stage').hidden = false;
   document.body.classList.add('mode-companion');
 
   $('#autoSyncBtn').hidden = !speechSupported();
+  $('#clockToggle').textContent = clock.isRunning() ? 'Pause' : 'Play';
 
   showLangPrompt();
   requestWakeLock();
   renderLoop();
+}
+
+$('#startBtn').addEventListener('click', () => {
+  applyActiveSrt();
+  enterStage();
 });
 
 $('#backBtn').addEventListener('click', () => {
@@ -250,8 +402,17 @@ function syncSettingsToControls() {
   $('#fontScale').value = settings.fontScale;
   $('#bgOpacity').value = settings.bgOpacity;
   $('#capBright').value = settings.capBright;
+  CREDENTIAL_FIELDS.forEach((k) => { $(`#${k}`).value = settings[k] || ''; });
   applyDisplayVars();
 }
+
+const CREDENTIAL_FIELDS = ['anthropicKey', 'osApiKey', 'osUser', 'osPass'];
+CREDENTIAL_FIELDS.forEach((k) => {
+  $(`#${k}`).addEventListener('input', (e) => {
+    settings[k] = e.target.value.trim();
+    saveSettings(settings);
+  });
+});
 $('#targetLang').addEventListener('change', (e) => { settings.targetLang = e.target.value; saveSettings(settings); });
 $('#sourceLang').addEventListener('change', (e) => { settings.sourceLang = e.target.value; saveSettings(settings); });
 $('#showBoth').addEventListener('change', (e) => { settings.showBoth = e.target.checked; saveSettings(settings); });

@@ -4,7 +4,39 @@ A free, offline-friendly **subtitle companion** for movies. The film plays where
 already watch it — TV, Netflix, a projector — and your iPad shows the captions in sync
 beside it. Optional free translation to **English or Sinhala**.
 
-No backend. No API keys. No login. Pure static files that run on GitHub Pages.
+No backend. Pure static files that run on GitHub Pages. Loading a `.srt` yourself
+needs no account at all; the optional auto-find feature uses your own API keys,
+kept in your browser's local storage and never committed.
+
+## Auto-find (optional)
+
+One button: it listens to the film through the mic for ~15 seconds, works out
+which film it is, downloads the subtitles, and loads them roughly aligned.
+
+Two credentials are needed, both entered in **Controls → Auto-find**:
+
+- **Anthropic API key** — identifies the film from the overheard dialogue. No
+  public subtitle API searches by dialogue content (OpenSubtitles matches on
+  title, IMDb/TMDb id, or file hash), so this step needs a model that can
+  recognize a film from its lines.
+- **OpenSubtitles API key + account** — the REST API requires a key on every
+  request, and downloads additionally require a login token and are capped per
+  day on the free tier.
+
+### Caveats worth knowing
+
+- **The key is exposed to your own browser.** Calling Anthropic directly from
+  client-side JS requires the `anthropic-dangerous-direct-browser-access`
+  header, and anyone with devtools open on your device can read the key. It is
+  never written to the repo, but treat it as a personal-use key and revoke it if
+  the device is shared. A small proxy would avoid this; it would also mean this
+  is no longer a backend-free app.
+- **Identification is a guess.** You confirm the film before anything downloads,
+  and generic dialogue often yields low confidence or nothing at all.
+- **Alignment is approximate.** The heard line is anchored to the middle of the
+  listening window, so expect to be a few seconds out — Tap to sync fixes it.
+- **CORS is not guaranteed.** Both APIs must allow browser origins. If a request
+  fails with a bare network error and no status code, that is what happened.
 
 ## How it works
 
@@ -65,6 +97,8 @@ css/styles.css        theme
 js/srtParser.js       .srt → cues
 js/syncEngine.js      offset + scale math, active-cue lookup
 js/clock.js           local clock driving the captions
+js/movieId.js         film identification from overheard dialogue
+js/subtitleFinder.js  OpenSubtitles search + download
 js/translator.js      free translation + cache
 js/store.js           settings, per-file sync, IndexedDB cache
 js/speechAutoSync.js  experimental mic auto-sync

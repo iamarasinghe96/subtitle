@@ -1,7 +1,7 @@
 // sw.js — caches the app shell for offline use.
 // Bump CACHE when you change any cached file.
 
-const CACHE = 'subsync-v7';
+const CACHE = 'subsync-v8';
 
 const ASSETS = [
   './',
@@ -14,6 +14,8 @@ const ASSETS = [
   './js/store.js',
   './js/clock.js',
   './js/speechAutoSync.js',
+  './js/movieId.js',
+  './js/subtitleFinder.js',
   './manifest.webmanifest',
   './icons/icon-192.png',
   './icons/icon-512.png',
@@ -36,11 +38,11 @@ self.addEventListener('activate', (e) => {
 self.addEventListener('fetch', (e) => {
   const url = new URL(e.request.url);
 
-  // Never cache translation calls — always go to network.
-  if (url.hostname.endsWith('mymemory.translated.net') ||
-      url.pathname.includes('/translate')) {
-    return; // default browser handling
-  }
+  // Only the app shell is ours to cache. Everything else — translation,
+  // film identification, subtitle downloads — goes straight to the network
+  // under default browser handling, so preflights and auth headers are
+  // untouched.
+  if (url.origin !== self.location.origin || e.request.method !== 'GET') return;
 
   // Cache-first for our own assets; fall back to network, then cache the result.
   e.respondWith(
@@ -48,7 +50,7 @@ self.addEventListener('fetch', (e) => {
       if (hit) return hit;
       return fetch(e.request)
         .then((res) => {
-          if (res.ok && e.request.method === 'GET' && url.origin === self.location.origin) {
+          if (res.ok) {
             const clone = res.clone();
             caches.open(CACHE).then((c) => c.put(e.request, clone));
           }

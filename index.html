@@ -23,7 +23,16 @@
     </header>
 
     <section class="panel">
-      <h2 class="eyebrow">Load subtitles (.srt)</h2>
+      <h2 class="eyebrow">Find it automatically</h2>
+      <button id="autoFindBtn" class="primary big">Listen &amp; find subtitles</button>
+      <p id="autoStatus" class="auto-status" role="status"></p>
+      <p class="hint">Start the film, then tap. Listens for ~15 seconds, works out
+        which film it is, downloads the subtitles and lines them up.
+        Needs your API keys in Controls → Auto-find.</p>
+    </section>
+
+    <section class="panel">
+      <h2 class="eyebrow">Or load a .srt yourself</h2>
       <div class="load-grid">
         <label class="file-btn">
           <!-- No accept filter: iOS maps accept to UTIs, and .srt has none,
@@ -157,11 +166,36 @@
       </section>
 
       <section class="group">
+        <h3>Auto-find</h3>
+        <p class="hint">Stored on this device only. The Anthropic key works out
+          which film you're watching from the dialogue; the OpenSubtitles
+          account downloads the file.</p>
+        <div class="field"><label for="anthropicKey">Anthropic key</label>
+          <input type="password" id="anthropicKey" autocomplete="off" placeholder="sk-ant-…" /></div>
+        <div class="field"><label for="osApiKey">OpenSubtitles key</label>
+          <input type="password" id="osApiKey" autocomplete="off" /></div>
+        <div class="field"><label for="osUser">OpenSubtitles user</label>
+          <input type="text" id="osUser" autocomplete="off" /></div>
+        <div class="field"><label for="osPass">OpenSubtitles password</label>
+          <input type="password" id="osPass" autocomplete="off" /></div>
+      </section>
+
+      <section class="group">
         <h3>Auto-sync</h3>
         <button id="autoSyncBtn" class="ghost" hidden>Auto-sync (experimental)</button>
         <p class="hint">Listens to the movie through the mic and guesses the offset. Often fails on iPad — Tap to sync is the reliable one.</p>
       </section>
     </aside>
+
+    <!-- Film confirmation, shown once Claude has guessed -->
+    <div id="filmPrompt" class="overlay" hidden>
+      <div class="overlay-card">
+        <h2>Is this the film?</h2>
+        <p id="filmHeard" class="film-heard"></p>
+        <div id="filmChoices" class="lang-btns"></div>
+        <button id="filmCancelBtn" class="ghost">None of these</button>
+      </div>
+    </div>
 
     <!-- Language pop-up on start -->
     <div id="langPrompt" class="overlay" hidden>

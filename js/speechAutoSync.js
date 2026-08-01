@@ -28,7 +28,9 @@ function tokenScore(a, b) {
 }
 
 // Listen for `listenMs`, then return { transcript }.
-function listen(listenMs, lang) {
+// Exported because the auto-download flow identifies the film from the same
+// transcript it later uses to anchor the sync.
+export function listen(listenMs, lang) {
   return new Promise((resolve, reject) => {
     const Rec = window.SpeechRecognition || window.webkitSpeechRecognition;
     const rec = new Rec();
@@ -57,6 +59,18 @@ function listen(listenMs, lang) {
       resolve({ transcript: transcript.trim() });
     }, listenMs);
   });
+}
+
+// Best-scoring cue for a transcript, or null if nothing scores above `floor`.
+// Shared with the auto-find flow, which reuses its identification transcript
+// as a rough sync anchor.
+export function bestCueMatch(transcript, cues, floor = 0.35) {
+  let best = null;
+  for (const cue of cues) {
+    const score = tokenScore(transcript, cue.text);
+    if (!best || score > best.confidence) best = { cue, confidence: score };
+  }
+  return best && best.confidence >= floor ? best : null;
 }
 
 // Attempt an auto-sync. Returns { matchedCue, confidence, listenedAtMs } or null.

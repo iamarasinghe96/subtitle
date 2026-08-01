@@ -185,6 +185,20 @@ body.mode-companion .caption-original { font-size: calc(2rem * var(--cap-scale))
 .field label { color: var(--muted); font-size: .88rem; }
 .field select { flex: 1; max-width: 60%; }
 .field input[type="range"] { flex: 1; max-width: 60%; accent-color: var(--amber); }
+.field input[type="text"], .field input[type="password"] {
+  flex: 1; min-width: 0; max-width: 60%;
+  background: var(--ink-3); border: 1.5px solid var(--line);
+  border-radius: 8px; padding: 8px 10px; font-size: .9rem;
+}
+
+.auto-status { color: var(--amber); font-size: .88rem; min-height: 1.2em; margin: 10px 0 0; line-height: 1.4; }
+.film-heard {
+  color: var(--muted); font-size: .82rem; font-style: italic;
+  margin: -8px 0 16px; line-height: 1.4;
+}
+.film-choice { display: grid; gap: 3px; text-align: left; }
+.film-choice .film-why { color: var(--muted); font-size: .78rem; font-weight: 400; font-style: italic; }
+.lang-btns + .ghost { margin-top: 10px; width: 100%; }
 .check { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: .88rem; margin: 8px 0; }
 .check input { accent-color: var(--amber); width: 18px; height: 18px; }
 
