@@ -15,22 +15,23 @@ which film it is, downloads the subtitles, and loads them roughly aligned.
 
 Two credentials are needed, both entered in **Controls → Auto-find**:
 
-- **Anthropic API key** — identifies the film from the overheard dialogue. No
-  public subtitle API searches by dialogue content (OpenSubtitles matches on
-  title, IMDb/TMDb id, or file hash), so this step needs a model that can
-  recognize a film from its lines.
+- **Groq API key** — identifies the film from the overheard dialogue. No public
+  subtitle API searches by dialogue content (OpenSubtitles matches on title,
+  IMDb/TMDb id, or file hash), so this step needs a model that can recognize a
+  film from its lines. Groq has a free tier; the model is set at the top of
+  `js/movieId.js` and may need updating as their catalogue rotates.
 - **OpenSubtitles API key + account** — the REST API requires a key on every
   request, and downloads additionally require a login token and are capped per
   day on the free tier.
 
 ### Caveats worth knowing
 
-- **The key is exposed to your own browser.** Calling Anthropic directly from
-  client-side JS requires the `anthropic-dangerous-direct-browser-access`
-  header, and anyone with devtools open on your device can read the key. It is
-  never written to the repo, but treat it as a personal-use key and revoke it if
-  the device is shared. A small proxy would avoid this; it would also mean this
-  is no longer a backend-free app.
+- **The keys are readable on your own device.** Any API key used from
+  client-side JS can be read by anyone with devtools open. Nothing is ever
+  written to the repo — this repo is public, so a committed key would be
+  world-readable and preserved in git history — but treat these as personal-use
+  credentials and rotate them if the device is shared. A small proxy would avoid
+  this; it would also mean this is no longer a backend-free app.
 - **Identification is a guess.** You confirm the film before anything downloads,
   and generic dialogue often yields low confidence or nothing at all.
 - **Alignment is approximate.** The heard line is anchored to the middle of the

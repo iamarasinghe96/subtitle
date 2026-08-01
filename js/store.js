@@ -15,7 +15,7 @@ const DEFAULT_SETTINGS = {
   endpoint: 'mymemory',     // translation provider id
 
   // Auto-find credentials. Kept on this device only — never in the repo.
-  anthropicKey: '',         // identifies the film from overheard dialogue
+  groqKey: '',              // identifies the film from overheard dialogue
   osApiKey: '',             // OpenSubtitles API key
   osUser: '',
   osPass: '',

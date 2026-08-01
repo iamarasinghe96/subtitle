@@ -129,9 +129,11 @@ function setAutoStatus(msg) {
 }
 
 const AUTO_ERRORS = {
-  'no-api-key': 'Add your Anthropic key in Controls → Auto-find.',
-  'bad-api-key': 'That Anthropic key was rejected.',
-  'rate-limited': 'Anthropic rate limit hit — wait a moment and try again.',
+  'no-api-key': 'Add your Groq key in Controls → Auto-find.',
+  'bad-api-key': 'That Groq key was rejected.',
+  'rate-limited': 'Groq rate limit hit — wait a moment and try again.',
+  'model-retired': 'Groq retired that model — update MODEL in js/movieId.js.',
+  'bad-json': "The model didn't return usable JSON. Try again.",
   'transcript-too-short': "Didn't catch enough dialogue. Turn the volume up and try again.",
   'refused': "Couldn't identify that one. Load the .srt manually.",
   'truncated': 'Ran out of room mid-answer — try again.',
@@ -145,7 +147,7 @@ const AUTO_ERRORS = {
 
 function autoErrorMessage(err) {
   if (AUTO_ERRORS[err.message]) return AUTO_ERRORS[err.message];
-  if (/^claude-http-/.test(err.message)) return `Identification failed (${err.message}).`;
+  if (/^groq-http-/.test(err.message)) return `Identification failed (${err.message}).`;
   if (/^os-/.test(err.message)) return `Subtitle download failed (${err.message}).`;
   // A cross-origin block surfaces as a bare TypeError with no status.
   if (err.name === 'TypeError') return 'Network blocked that request — see the README on CORS.';
@@ -170,7 +172,7 @@ $('#autoFindBtn').addEventListener('click', async () => {
     clock.start();
 
     setAutoStatus('Working out which film this is…');
-    const guesses = await identifyFilm(transcript, { apiKey: settings.anthropicKey });
+    const guesses = await identifyFilm(transcript, { apiKey: settings.groqKey });
     if (guesses.length === 0) throw new Error('refused');
 
     const pick = await askWhichFilm(transcript, guesses);
@@ -406,7 +408,7 @@ function syncSettingsToControls() {
   applyDisplayVars();
 }
 
-const CREDENTIAL_FIELDS = ['anthropicKey', 'osApiKey', 'osUser', 'osPass'];
+const CREDENTIAL_FIELDS = ['groqKey', 'osApiKey', 'osUser', 'osPass'];
 CREDENTIAL_FIELDS.forEach((k) => {
   $(`#${k}`).addEventListener('input', (e) => {
     settings[k] = e.target.value.trim();
