@@ -119,6 +119,30 @@ select {
 #backBtn { background: none; color: #4a5061; }
 #gearBtn { color: #aab2c4; }
 
+/* The tap target is the whole caption area — hittable in the dark without
+   looking away from the film. */
+.tap-prompt {
+  /* Below the topbar (5) so the gear stays reachable while the prompt is up —
+     the prompt covers the whole screen, and a higher z-index would swallow it. */
+  position: absolute; inset: 0; z-index: 3;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 14px; padding: 0 8%; text-align: center;
+  background: none; color: var(--text);
+}
+.tap-prompt-lead, .tap-prompt-foot {
+  color: var(--muted); font-size: .9rem; letter-spacing: .02em;
+}
+.tap-prompt-line {
+  font-size: calc(1.9rem * var(--cap-scale)); font-weight: 640; line-height: 1.3;
+  max-width: 22ch; text-wrap: balance;
+  color: var(--amber);
+}
+.tap-prompt:active .tap-prompt-line { transform: scale(.99); }
+@media (prefers-reduced-motion: no-preference) {
+  .tap-prompt-foot { animation: pulse 2.4s ease-in-out infinite; }
+}
+@keyframes pulse { 0%,100% { opacity: .45; } 50% { opacity: 1; } }
+
 .caption-wrap {
   position: absolute; left: 0; right: 0; bottom: 8%; z-index: 4;
   display: flex; flex-direction: column; align-items: center; gap: 6px;
@@ -172,10 +196,6 @@ body.mode-companion .caption-original { font-size: calc(2rem * var(--cap-scale))
 .primary.flash { animation: flash .25s; }
 @keyframes flash { 50% { filter: brightness(1.4); } }
 
-.tap-target {
-  background: var(--ink-3); border: 1px dashed var(--amber-dim); border-radius: 10px;
-  padding: 12px; color: var(--text); font-size: 1rem; margin-bottom: 10px; min-height: 1.4em;
-}
 .nudge-row { display: flex; gap: 8px; flex-wrap: wrap; }
 .nudge-row button { flex: 1; min-width: 60px; background: var(--ink-3); border: 1px solid var(--line); border-radius: 10px; padding: 12px 6px; }
 .nudge-row button.primary { background: var(--amber); border-color: var(--amber); }

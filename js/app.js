@@ -296,6 +296,7 @@ $('#backBtn').addEventListener('click', () => {
   $('#stage').hidden = true;
   $('#setup').hidden = false;
   setControlsOpen(false);
+  hideTapPrompt();
   clock.pause();
   releaseWakeLock();
 });
@@ -310,6 +311,10 @@ document.querySelectorAll('#langPrompt [data-lang]').forEach((btn) => {
     saveSettings(settings);
     syncSettingsToControls();
     $('#langPrompt').hidden = true;
+    // Nothing else to configure — start running and put the tap target up.
+    clock.start();
+    $('#clockToggle').textContent = 'Pause';
+    showTapPrompt();
     if (settings.targetLang !== 'off') maybeOfferTranslate();
   });
 });
@@ -338,14 +343,32 @@ $('#clockToggle').addEventListener('click', () => {
 });
 
 // ---- Tap to Sync ----
-$('#tapSyncBtn').addEventListener('click', () => {
+// The prompt covers the caption area, so the target is the whole screen.
+let tapCue = null;
+
+function showTapPrompt() {
+  tapCue = null;
+  $('#tapPrompt').hidden = false;
+}
+
+function hideTapPrompt() {
+  $('#tapPrompt').hidden = true;
+  tapCue = null;
+}
+
+$('#tapPrompt').addEventListener('click', () => {
   const now = timeSource.getTimeMs();
-  const cue = engine.activeCue(now) || engine.upcomingCue(now);
+  const cue = tapCue || engine.activeCue(now) || engine.upcomingCue(now);
   if (!cue) return;
   engine.syncCueToNow(cue, now);
   persistSync();
   updateOffsetReadout();
-  flash('#tapSyncBtn');
+  hideTapPrompt();
+});
+
+$('#reSyncBtn').addEventListener('click', () => {
+  setControlsOpen(false);
+  showTapPrompt();
 });
 
 // ---- Two-point sync ----
@@ -551,9 +574,15 @@ function renderLoop() {
     }
   }
 
-  // Tap-to-sync button shows the line you're aiming at.
-  const upcoming = engine.upcomingCue(t);
-  $('#tapTarget').textContent = upcoming ? clip(upcoming.text, 60) : '—';
+  // While the tap prompt is up it owns the caption area, and the line it
+  // names is frozen — a target that changed under your finger would be
+  // impossible to hit.
+  if (!$('#tapPrompt').hidden) {
+    if (!tapCue) tapCue = engine.activeCue(t) || engine.upcomingCue(t);
+    $('#tapPromptLine').textContent = tapCue ? clip(tapCue.text, 90) : '—';
+    capO.textContent = '';
+    capT.textContent = '';
+  }
 
   $('#clockTime').textContent = formatMs(t);
 
@@ -562,10 +591,6 @@ function renderLoop() {
 
 // ---- helpers ----
 function clip(s, n = 42) { return s.length > n ? s.slice(0, n - 1) + '…' : s; }
-function flash(sel) {
-  const el = $(sel); el.classList.add('flash');
-  setTimeout(() => el.classList.remove('flash'), 250);
-}
 function langTag(code) {
   return { en: 'en-US', hi: 'hi-IN', ta: 'ta-IN', te: 'te-IN', zh: 'zh-CN' }[code] || 'en-US';
 }

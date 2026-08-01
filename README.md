@@ -47,7 +47,10 @@ The movie plays elsewhere (TV, Netflix, etc.). The iPad runs a local clock you a
 
 ## Syncing
 
-- **Tap to Sync** — when you hear the line shown on the button, tap it. The offset locks.
+- **Tap to Sync** — when the stage opens, the clock starts and the line you're
+  waiting for fills the screen. Tap anywhere the moment you hear it and the
+  offset locks; the prompt then disappears for good. Controls → Sync → Re-sync
+  brings it back if the film drifts.
 - **Fine adjust** — nudge ±0.1s / ±1s (or use the ← → arrow keys).
 - **Fix drift (two-point)** — tap A on an early line and B on a late line, then Apply. This
   solves both offset *and* speed, fixing the gradual desync you get from framerate mismatch

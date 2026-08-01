@@ -92,6 +92,15 @@
       <div id="captionOriginal" class="caption caption-original"></div>
     </div>
 
+    <!-- First-line sync, on the stage rather than buried in the drawer: the
+         whole screen is the button, so it can be hit without looking away
+         from the film. Disappears for good once tapped. -->
+    <button id="tapPrompt" class="tap-prompt" hidden>
+      <span class="tap-prompt-lead">Tap the moment you hear</span>
+      <span id="tapPromptLine" class="tap-prompt-line"></span>
+      <span class="tap-prompt-foot">…and the subtitles lock on</span>
+    </button>
+
     <!-- Tapping outside the drawer closes it; the gear that opened it is
          underneath the drawer on a phone-width screen. -->
     <div id="controlsScrim" class="controls-scrim" hidden></div>
@@ -110,10 +119,10 @@
       </div>
 
       <section class="group">
-        <h3>Tap to sync</h3>
-        <p class="hint">When you hear this line, tap the button.</p>
-        <div class="tap-target">“<span id="tapTarget">—</span>”</div>
-        <button id="tapSyncBtn" class="primary big">Tap — this line is now</button>
+        <h3>Sync</h3>
+        <p class="hint">Drifted? This puts the tap target back on screen so you
+          can line it up on the next line you hear.</p>
+        <button id="reSyncBtn" class="primary big">Re-sync</button>
       </section>
 
       <section class="group">
