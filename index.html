@@ -151,24 +151,25 @@
       <section class="group">
         <h3>Language</h3>
         <div class="field">
-          <label for="targetLang">Show</label>
-          <select id="targetLang">
-            <option value="off">Original only</option>
-            <option value="en">English</option>
-            <option value="si">Sinhala</option>
-          </select>
-        </div>
-        <label class="check"><input type="checkbox" id="showBoth" /> Show original + translation</label>
-        <div class="field">
-          <label for="sourceLang">Subtitle language</label>
+          <label for="sourceLang">The .srt is in</label>
           <select id="sourceLang">
             <option value="en">English</option>
+            <option value="si">Sinhala</option>
             <option value="hi">Hindi</option>
             <option value="ta">Tamil</option>
             <option value="te">Telugu</option>
             <option value="zh">Chinese</option>
           </select>
         </div>
+        <div class="field">
+          <label for="targetLang">Translate to</label>
+          <select id="targetLang">
+            <option value="off">Don't translate</option>
+            <option value="en">English</option>
+            <option value="si">Sinhala</option>
+          </select>
+        </div>
+        <label class="check"><input type="checkbox" id="showBoth" /> Show original + translation</label>
         <button id="translateBtn" class="primary">Translate subtitles</button>
         <div id="translateProgress" class="progress" hidden>
           <div class="bar"><div id="translateBar"></div></div>

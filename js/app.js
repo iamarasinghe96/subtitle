@@ -459,8 +459,12 @@ function applyDisplayVars() {
 $('#translateBtn').addEventListener('click', async () => {
   if (activeSrt < 0) return;
   const tgt = $('#targetLang').value;
-  if (tgt === 'off') { setControlMsg('Choose English or Sinhala first.'); return; }
+  if (tgt === 'off') { setControlMsg('Pick a language under “Translate to” first.'); return; }
   const src = $('#sourceLang').value;
+  if (src === tgt) {
+    setControlMsg('The file is already in that language — nothing to translate.');
+    return;
+  }
   const f = srtFiles[activeSrt];
 
   if (translateAbort) translateAbort.abort();

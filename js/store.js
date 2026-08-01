@@ -5,7 +5,13 @@
 
 const SETTINGS_KEY = 'subsync.settings.v1';
 
+// Bumped whenever a stored value needs rewriting. Saved settings are merged
+// *over* the defaults, so changing a default alone never reaches an existing
+// install — it needs a migration below.
+const SCHEMA = 2;
+
 const DEFAULT_SETTINGS = {
+  schema: SCHEMA,
   targetLang: 'off',        // 'off' | 'en' | 'si'
   sourceLang: 'en',         // source language of the SRT for translation
   showBoth: false,          // show original + translation stacked
@@ -24,7 +30,25 @@ const DEFAULT_SETTINGS = {
 export function loadSettings() {
   try {
     const raw = localStorage.getItem(SETTINGS_KEY);
-    return raw ? { ...DEFAULT_SETTINGS, ...JSON.parse(raw) } : { ...DEFAULT_SETTINGS };
+    if (!raw) return { ...DEFAULT_SETTINGS };
+
+    const saved = JSON.parse(raw);
+    const settings = { ...DEFAULT_SETTINGS, ...saved };
+    // Read the version off the *saved* object: the merge above would otherwise
+    // hand back the current schema and every migration would look done.
+    const from = Number(saved.schema) || 1;
+
+    if (from < 2) {
+      // Batched Groq translation replaced MyMemory as the default. Installs
+      // predating it kept MyMemory, whose per-line quota cannot finish a film.
+      if (settings.endpoint === 'mymemory') settings.endpoint = 'groq';
+    }
+
+    if (from < SCHEMA) {
+      settings.schema = SCHEMA;
+      saveSettings(settings);
+    }
+    return settings;
   } catch {
     return { ...DEFAULT_SETTINGS };
   }

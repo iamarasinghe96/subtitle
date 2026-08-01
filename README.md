@@ -93,6 +93,8 @@ Open the Pages URL in **Safari** → Share → **Add to Home Screen**. It launch
   is hard to transcribe and iOS often disables speech recognition inside a home-screen PWA,
   so treat it as a bonus — Tap to Sync is the dependable path.
 - Live translation needs a connection; cached translations keep working offline.
+- Controls → Language has two separate pickers: **The .srt is in** (the file's
+  own language) and **Translate to** (what you want on screen).
 - Two providers, picked under Controls → Language:
   - **Groq** (default) translates ~40 lines per request, so a feature film is a
     few dozen calls and finishes in a couple of minutes. Uses the same key as
